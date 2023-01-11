@@ -4,22 +4,22 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>전체 게시물 조회</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">글 작성</a>
 </p>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.title)
+                @Html.DisplayName("제목")
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.contents)
+                @Html.DisplayName("내용")
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.CreatedDatetime)
+                @Html.DisplayName("작성일")
             </th>
             <th></th>
         </tr>
@@ -37,9 +37,9 @@
                 @Html.DisplayFor(modelItem => item.CreatedDatetime)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.post_id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.post_id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.post_id">Delete</a>
+                <a asp-action="Edit" asp-route-id="@item.post_id">수정</a> |
+                <a asp-action="Details" asp-route-id="@item.post_id">조회</a> |
+                <a asp-action="Delete" asp-route-id="@item.post_id">삭제</a>
             </td>
         </tr>
 }
