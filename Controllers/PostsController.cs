@@ -157,5 +157,15 @@ namespace Notice.Controllers
         {
           return _context.Posts.Any(e => e.post_id == id);
         }
+        public async Task<IActionResult> Search(string q)
+        {
+            var posts = from m in _context.Posts
+                        select m;
+            if (!String.IsNullOrEmpty(q))
+            {
+                posts = posts.Where(s => s.title.Contains(q) || s.contents.Contains(q));
+            }
+            return View(await posts.ToListAsync());
+        }
     }
 }
