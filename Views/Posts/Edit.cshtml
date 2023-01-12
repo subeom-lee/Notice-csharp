@@ -26,17 +26,17 @@
                 <input asp-for="CreatedDatetime" class="form-control" />
                 <span asp-validation-for="CreatedDatetime" class="text-danger"></span>
             </div>
+            <br />
             <div class="form-group">
-                <input type="submit" value="수정" class="btn btn-primary" />
+                <input type="submit" value="수정" class="btn btn-success" /> |
+                <a class="btn btn-primary" asp-action="Index">목록으로</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">목록으로</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

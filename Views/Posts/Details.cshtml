@@ -30,6 +30,7 @@
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.post_id">수정</a> |
-    <a asp-action="Index">목록으로</a>
+    <a class="btn btn-success" asp-action="Edit" asp-route-id="@Model?.post_id">수정</a> |
+    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@Model?.post_id">삭제</a> |
+    <a class="btn btn-primary"  asp-action="Index">목록으로</a>
 </div>
