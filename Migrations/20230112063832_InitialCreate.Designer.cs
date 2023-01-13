@@ -12,7 +12,7 @@ using Notice.Data;
 namespace Notice.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230111073047_InitialCreate")]
+    [Migration("20230112063832_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -35,6 +35,12 @@ namespace Notice.Migrations
 
                     b.Property<DateTime>("CreatedDatetime")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("PageIndex")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalPages")
+                        .HasColumnType("int");
 
                     b.Property<string>("contents")
                         .IsRequired()

@@ -33,6 +33,12 @@ namespace Notice.Migrations
                     b.Property<DateTime>("CreatedDatetime")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("PageIndex")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalPages")
+                        .HasColumnType("int");
+
                     b.Property<string>("contents")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

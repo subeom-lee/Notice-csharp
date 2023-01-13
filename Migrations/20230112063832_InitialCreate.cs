@@ -19,7 +19,9 @@ namespace Notice.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     contents = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedDatetime = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreatedDatetime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PageIndex = table.Column<int>(type: "int", nullable: false),
+                    TotalPages = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

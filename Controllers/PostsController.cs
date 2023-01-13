@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
+using Microsoft.Extensions.Hosting;
 using Notice.Data;
 using Notice.Models;
 
@@ -20,9 +22,31 @@ namespace Notice.Controllers
         }
 
         // GET: Posts
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
-              return View(await _context.Posts.ToListAsync());
+            const int pageSize = 10;
+            var posts = await _context.Posts
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var totalPages = (int)Math.Ceiling((double)_context.Posts.Count() / pageSize);
+
+            var viewModel = new PostViewModel
+            {
+                Items = posts,
+                CurrentPage = page,
+                TotalPages = totalPages
+            };
+
+            return View(viewModel);
+        }
+
+        public class PostViewModel
+        {
+            public List<Post>? Items { get; set; }
+            public int CurrentPage { get; set; }
+            public int TotalPages { get; set; }
         }
 
         // GET: Posts/Details/5
@@ -148,14 +172,14 @@ namespace Notice.Controllers
             {
                 _context.Posts.Remove(post);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool PostExists(int id)
         {
-          return _context.Posts.Any(e => e.post_id == id);
+            return _context.Posts.Any(e => e.post_id == id);
         }
         public async Task<IActionResult> Search(string q)
         {

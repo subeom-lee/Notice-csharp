@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Notice.Models.Post>
+﻿@model Notice.Controllers.PostsController.PostViewModel
 
 @{
     ViewData["Title"] = "Index";
@@ -22,7 +22,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.Items)
         {
             <tr>
                 <td style="text-align:center; vertical-align: middle;">
@@ -43,30 +43,40 @@
         }
     </tbody>
 </table>
-<div style="text-align:center">
-    <form asp-action="Search" method="get">
-        <div style="text-align:center">
-            <div style="display: flex;">
-                <div>
-                    <input type="text" placeholder="검색어를 입력해주세요." class="form-control" name="q" required>
-                </div>
-                <div style="float:left; margin-left:10px;">
-                    <button class="btn btn-primary">검색</button>
-                </div>
+<br />
+<form asp-action="Search" method="get">
+    <div style="text-align:center; float:right">
+        <div style="display: flex;">
+            <div>
+                <input type="text" placeholder="검색어를 입력해주세요." class="form-control" name="q" required>
+            </div>
+            <div style="float:left; margin-left:10px;">
+                <button class="btn btn-primary">검색</button>
+                <a asp-action="Create" class="btn btn-primary">글 작성</a>
             </div>
         </div>
-    </form>
-    <br />
-    <br />
+    </div>
+</form>
+<br />
+<br />
+<br />
+<div style="text-align:center">
     <div class="btn-group me-2" role="group" aria-label="First group">
-        <button type="button" class="page-link">&laquo;</button>
-        <button type="button" class="page-link">1</button>
-        <button type="button" class="page-link">2</button>
-        <button type="button" class="page-link">3</button>
-        <button type="button" class="page-link">&raquo;</button>
+        <a id="first" asp-action="Index" asp-route-page="@(Model.CurrentPage - 1)" class="page-link">&laquo;</a>
+        <a asp-action="Index" asp-route-page="@(1)" class="page-link">1</a>
+        <a asp-action="Index" asp-route-page="@(2)" class="page-link">2</a>
+        <a asp-action="Index" asp-route-page="@(3)" class="page-link">3</a>
+        <a asp-action="Index" asp-route-page="@(Model.CurrentPage + 1)" class="page-link">&raquo;</a>
     </div>
 </div>
-<br />
-<p>
-    <a asp-action="Create" class="btn btn-primary" style="float:right">글 작성</a>
-</p>
+
+@section Scripts{
+    <script>
+        if (@Model.CurrentPage === 1) {
+            console.log(@Model.CurrentPage)
+            document.getElementById("first").addEventListener('click', function (e) {
+                e.preventDefault();
+            });
+        }
+    </script>
+    }
