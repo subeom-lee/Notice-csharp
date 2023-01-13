@@ -10,5 +10,6 @@ namespace Notice.Models
         public string contents { get; set; }
         public DateTime CreatedDatetime { get; set; } = DateTime.Now;
         public DateTime UpdatedDatetime { get; set; } = DateTime.Now;
+        public int ViewCount { get; set; }
     }
 }

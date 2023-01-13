@@ -64,6 +64,10 @@ namespace Notice.Controllers
                 return NotFound();
             }
 
+            post.ViewCount++;
+            _context.Posts.Update(post);
+            await _context.SaveChangesAsync();
+
             return View(post);
         }
 

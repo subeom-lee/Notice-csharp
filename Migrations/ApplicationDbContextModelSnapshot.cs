@@ -36,6 +36,9 @@ namespace Notice.Migrations
                     b.Property<DateTime>("UpdatedDatetime")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("ViewCount")
+                        .HasColumnType("int");
+
                     b.Property<string>("contents")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
