@@ -78,10 +78,11 @@ namespace Notice.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("post_id,title,contents,CreatedDatetime")] Post post)
+        public async Task<IActionResult> Create([Bind("post_id,title,contents")] Post post)
         {
             if (ModelState.IsValid)
             {
+                post.CreatedDatetime = DateTime.Now;
                 _context.Add(post);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -110,7 +111,7 @@ namespace Notice.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("post_id,title,contents,CreatedDatetime")] Post post)
+        public async Task<IActionResult> Edit(int id, [Bind("post_id,title,contents")] Post post)
         {
             if (id != post.post_id)
             {
@@ -121,6 +122,7 @@ namespace Notice.Controllers
             {
                 try
                 {
+                    post.CreatedDatetime = DateTime.Now;
                     _context.Update(post);
                     await _context.SaveChangesAsync();
                 }
