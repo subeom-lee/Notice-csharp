@@ -22,23 +22,22 @@ namespace Notice.Controllers
         }
 
         // GET: Posts
-        public async Task<IActionResult> Index(int page = 1)
+        public async Task<IActionResult> Index(string searchString, int page = 1)
         {
             const int pageSize = 10;
-            var posts = await _context.Posts
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            var totalPages = (int)Math.Ceiling((double)_context.Posts.Count() / pageSize);
-
+            var posts = _context.Posts.AsQueryable();
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                posts = posts.Where(s => s.title.Contains(searchString) || s.contents.Contains(searchString));
+            }
+            var totalPages = (int)Math.Ceiling((double)posts.Count() / pageSize);
             var viewModel = new PostViewModel
             {
-                Items = posts,
+                Items = await posts.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(),
                 CurrentPage = page,
-                TotalPages = totalPages
+                TotalPages = totalPages,
+                SearchString = searchString
             };
-
             return View(viewModel);
         }
 
@@ -47,6 +46,7 @@ namespace Notice.Controllers
             public List<Post>? Items { get; set; }
             public int CurrentPage { get; set; }
             public int TotalPages { get; set; }
+            public string SearchString { get; set; }
         }
 
         // GET: Posts/Details/5
@@ -185,16 +185,6 @@ namespace Notice.Controllers
         private bool PostExists(int id)
         {
             return _context.Posts.Any(e => e.post_id == id);
-        }
-        public async Task<IActionResult> Search(string q)
-        {
-            var posts = from m in _context.Posts
-                        select m;
-            if (!String.IsNullOrEmpty(q))
-            {
-                posts = posts.Where(s => s.title.Contains(q) || s.contents.Contains(q));
-            }
-            return View(await posts.ToListAsync());
         }
     }
 }
