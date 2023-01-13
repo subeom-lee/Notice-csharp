@@ -20,8 +20,7 @@ namespace Notice.Migrations
                     title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     contents = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedDatetime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PageIndex = table.Column<int>(type: "int", nullable: false),
-                    TotalPages = table.Column<int>(type: "int", nullable: false)
+                    UpdatedDatetime = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {

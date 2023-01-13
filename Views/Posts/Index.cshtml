@@ -18,7 +18,9 @@
             <th style="text-align:center;">
                 @Html.DisplayName("작성일")
             </th>
-            <th></th>
+            <th style="text-align:center;">
+                @Html.DisplayName("수정일")
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -33,6 +35,9 @@
                 </td>
                 <td style="text-align:center; vertical-align: middle;">
                     @Html.DisplayFor(modelItem => item.CreatedDatetime)
+                </td>
+                <td style="text-align:center; vertical-align: middle;">
+                    @Html.DisplayFor(modelItem => item.UpdatedDatetime)
                 </td>
                 <td>
                     <a asp-action="Details" class="btn btn-primary" asp-route-id="@item.post_id">조회</a> |

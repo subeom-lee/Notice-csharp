@@ -122,8 +122,11 @@ namespace Notice.Controllers
             {
                 try
                 {
-                    post.CreatedDatetime = DateTime.Now;
-                    _context.Update(post);
+                    post.UpdatedDatetime = DateTime.Now;
+                    var postFromDb = await _context.Posts.FirstOrDefaultAsync(x => x.post_id == post.post_id);
+                    postFromDb.title = post.title;
+                    postFromDb.contents = post.contents;
+                    postFromDb.UpdatedDatetime = DateTime.Now;
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
