@@ -6,5 +6,12 @@ Language : C# <br>
 Framework : Asp.net <br>
 Database : SQL <br>
 
-### 구현 목록
-게시글 조회 상세조회 작성 수정 삭제 검색 페이지네이션
+### Implementation List
+View DetailView Create Update Delete Search Pagenation
+Automatically create a creation date / Automatically create a modification date
+
+### List to implement
+ViewCount
+
+## To be fixed
+Merging Searchfile and Indexfile
