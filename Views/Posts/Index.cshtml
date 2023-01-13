@@ -1,0 +1,87 @@
+﻿@model Notice.Controllers.PostsController.PostViewModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>전체 게시물 조회</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th style="text-align:center;">
+                @Html.DisplayName("제목")
+            </th>
+            <th style="text-align:center;">
+                @Html.DisplayName("내용")
+            </th>
+            <th style="text-align:center;">
+                @Html.DisplayName("작성일")
+            </th>
+            <th style="text-align:center;">
+                @Html.DisplayName("수정일")
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td style="text-align:center; vertical-align: middle;">
+                    @Html.DisplayFor(modelItem => item.title)
+                </td>
+                <td style="text-align:center; vertical-align: middle;">
+                    @Html.DisplayFor(modelItem => item.contents)
+                </td>
+                <td style="text-align:center; vertical-align: middle;">
+                    @Html.DisplayFor(modelItem => item.CreatedDatetime)
+                </td>
+                <td style="text-align:center; vertical-align: middle;">
+                    @Html.DisplayFor(modelItem => item.UpdatedDatetime)
+                </td>
+                <td>
+                    <a asp-action="Details" class="btn btn-primary" asp-route-id="@item.post_id">조회</a> |
+                    <a asp-action="Edit" class="btn btn-success" asp-route-id="@item.post_id">수정</a> |
+                    <a asp-action="Delete" class="btn btn-danger" asp-route-id="@item.post_id">삭제</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<br />
+<form asp-action="Search" method="get">
+    <div style="text-align:center; float:right">
+        <div style="display: flex;">
+            <div>
+                <input type="text" placeholder="검색어를 입력해주세요." class="form-control" name="q" required>
+            </div>
+            <div style="float:left; margin-left:10px;">
+                <button class="btn btn-primary">검색</button>
+                <a asp-action="Create" class="btn btn-primary">글 작성</a>
+            </div>
+        </div>
+    </div>
+</form>
+<br />
+<br />
+<br />
+<div style="text-align:center">
+    <div class="btn-group me-2" role="group" aria-label="First group">
+        <a id="first" asp-action="Index" asp-route-page="@(Model.CurrentPage - 1)" class="page-link">&laquo;</a>
+        <a asp-action="Index" asp-route-page="@(1)" class="page-link">1</a>
+        <a asp-action="Index" asp-route-page="@(2)" class="page-link">2</a>
+        <a asp-action="Index" asp-route-page="@(3)" class="page-link">3</a>
+        <a asp-action="Index" asp-route-page="@(Model.CurrentPage + 1)" class="page-link">&raquo;</a>
+    </div>
+</div>
+<br />
+
+@section Scripts{
+    <script>
+        if (@Model.CurrentPage === 1) {
+            document.getElementById("first").addEventListener('click', function (e) {
+                e.preventDefault();
+            });
+        }
+    </script>
+    }

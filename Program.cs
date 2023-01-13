@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using Notice.Data;
+
 namespace Notice
 {
     public class Program
@@ -8,6 +11,9 @@ namespace Notice
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddDbContext<ApplicationDbContext>(option => option.UseSqlServer(
+                builder.Configuration.GetConnectionString("DefaultConnection")
+                ));
 
             var app = builder.Build();
 
