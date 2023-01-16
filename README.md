@@ -18,3 +18,4 @@ ViewCount
 
 ## To be fixed
 Merging Searchfile and Indexfile
+navigation Update
