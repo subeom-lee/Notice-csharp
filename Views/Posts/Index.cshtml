@@ -91,22 +91,9 @@
         {
             <a id="first" asp-action="Index" asp-route-page="@(Model.CurrentPage - 1)" class="page-link">&lt;</a>
         }
-        <a asp-action="Index" asp-route-page="@(1)" class="page-link">1</a>
-        @if (Model.TotalPages > 1)
+        @for (int i = 1; i <= Model.TotalPages; i++)
         {
-            <a asp-action="Index" asp-route-page="@(2)" class="page-link">2</a>
-        }
-        @if (Model.TotalPages > 2)
-        {
-            <a asp-action="Index" asp-route-page="@(3)" class="page-link">3</a>
-        }
-        @if (Model.TotalPages > 3)
-        {
-            <a asp-action="Index" asp-route-page="@(4)" class="page-link">4</a>
-        }
-        @if (Model.TotalPages > 4)
-        {
-            <a asp-action="Index" asp-route-page="@(5)" class="page-link">5</a>
+            <a asp-action="Index" asp-route-page="@i" class="page-link">@i</a>
         }
         @if (Model.CurrentPage < Model.TotalPages)
         {
