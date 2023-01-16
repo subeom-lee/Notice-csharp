@@ -22,13 +22,25 @@ namespace Notice.Controllers
         }
 
         // GET: Posts
-        public async Task<IActionResult> Index(string searchString, int page = 1)
+        public async Task<IActionResult> Index(string searchString, string sortType, int page = 1)
         {
             const int pageSize = 10;
             var posts = _context.Posts.AsQueryable();
             if (!String.IsNullOrEmpty(searchString))
             {
                 posts = posts.Where(s => s.title.Contains(searchString) || s.contents.Contains(searchString));
+            }
+            if (!String.IsNullOrEmpty(sortType) && sortType == "viewcount")
+            {
+                posts = posts.OrderByDescending(p => p.ViewCount);
+            }
+            else if (!String.IsNullOrEmpty(sortType) && sortType == "createdatetime")
+            {
+                posts = posts.OrderByDescending(p => p.CreatedDatetime);
+            }
+            else if (!String.IsNullOrEmpty(sortType) && sortType == "olddatetime")
+            {
+                posts = posts.OrderBy(p => p.CreatedDatetime);
             }
             var totalPages = (int)Math.Ceiling((double)posts.Count() / pageSize);
             var viewModel = new PostViewModel
