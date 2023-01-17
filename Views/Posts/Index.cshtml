@@ -6,25 +6,47 @@
 
 <h1>전체 게시물 조회</h1>
 <br />
-<div class="d-flex justify-content-between">
-    <a asp-action="Create" class="btn btn-primary mr-3">글 작성</a>
-    <form asp-action="Index" method="get" class="form-inline">
-        <div class="input-group mr-3">
-            <input style="width:300px" type="text" placeholder="검색어를 입력해주세요." class="form-control" name="searchString" required>
-            <div class="input-group-append">
-                <button class="btn btn-primary">검색</button>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-1 col-md-6 col-sm-12">
+            <div style="float:left">
+                <button class="btn btn-primary dropdown-toggle" name="sortType" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    검색 옵션
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#">제목만</a></li>
+                    <li><a class="dropdown-item" href="#">내용만</a></li>
+                    <li><a class="dropdown-item" href="#">제목 + 내용</a></li>
+                </ul>
             </div>
         </div>
-    </form>
-    <div class="dropdown">
-        <button class="btn btn-primary dropdown-toggle" name="sortType" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-            분류
-        </button>
-        <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="?sortType=viewcount">조회수순</a></li>
-            <li><a class="dropdown-item" href="?sortType=createdatetime">최신순</a></li>
-            <li><a class="dropdown-item" href="?sortType=olddatetime">오래된순</a></li>
-        </ul>
+        <div class="col-lg-3 col-md-6 col-sm-12">
+            <div style="margin-left: 10px">
+                <form asp-action="Index" method="get" style="width:300px;">
+                    <div class="input-group">
+                        <input style="width:100px" type="text" placeholder="검색어를 입력해주세요." class="form-control" name="searchString" required>
+                        <div class="input-group-append" style="margin-left:10px">
+                            <button class="btn btn-primary">검색</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 col-sm-12">
+            <button class="btn btn-primary dropdown-toggle" name="sortType" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                정렬
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="?sortType=viewcount">조회수순</a></li>
+                <li><a class="dropdown-item" href="?sortType=createdatetime">최신순</a></li>
+                <li><a class="dropdown-item" href="?sortType=olddatetime">오래된순</a></li>
+            </ul>
+        </div>
+        <div class="col-lg-5 col-md-6 col-sm-12">
+            <div style="float:right">
+                <a asp-action="Create" class="btn btn-primary">글 작성</a>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -60,7 +82,9 @@
                     @Html.DisplayFor(modelItem => item.ViewCount)
                 </td>
                 <td style="text-align:center; vertical-align: middle;">
-                    @Html.DisplayFor(modelItem => item.title)
+                    <a href="#" onclick="location.href='@Url.Action("Details","Posts", new { id = item.post_id })'" class="post-title">
+                        @Html.DisplayFor(modelItem => item.title)
+                    </a>
                 </td>
                 <td style="text-align:center; vertical-align: middle;">
                     @Html.DisplayFor(modelItem => item.contents)
