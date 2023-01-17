@@ -83,7 +83,7 @@
                     @Html.DisplayFor(modelItem => item.ViewCount)
                 </td>
                 <td style="text-align:center; vertical-align: middle;">
-                    <a href="#" onclick="location.href='@Url.Action("Details","Posts", new { id = item.post_id })'" class="post-title">
+                    <a asp-action="Details" asp-route-id="@item.post_id" asp-route-page="@Model.CurrentPage">
                         @Html.DisplayFor(modelItem => item.title)
                     </a>
                 </td>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 using Microsoft.Extensions.Hosting;
 using Notice.Data;
 using Notice.Models;
+
 
 namespace Notice.Controllers
 {
@@ -62,8 +64,9 @@ namespace Notice.Controllers
         }
 
         // GET: Posts/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, int page = 1)
         {
+            ViewBag.CurrentPage = page;
             if (id == null || _context.Posts == null)
             {
                 return NotFound();
