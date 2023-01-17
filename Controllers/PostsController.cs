@@ -24,7 +24,7 @@ namespace Notice.Controllers
         // GET: Posts
         public async Task<IActionResult> Index(string searchString, string sortType, int page = 1)
         {
-            const int pageSize = 10;
+            const int pageSize = 8;
             var posts = _context.Posts.AsQueryable();
             if (!String.IsNullOrEmpty(searchString))
             {
