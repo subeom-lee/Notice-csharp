@@ -12,7 +12,7 @@ using Notice.Data;
 namespace Notice.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230113050927_InitialCreate")]
+    [Migration("20230120015646_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -25,6 +25,24 @@ namespace Notice.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Notice.Models.Category", b =>
+                {
+                    b.Property<int>("Category_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Category_id"));
+
+                    b.Property<int?>("Category_id1")
+                        .HasColumnType("int");
+
+                    b.HasKey("Category_id");
+
+                    b.HasIndex("Category_id1");
+
+                    b.ToTable("Categories");
+                });
+
             modelBuilder.Entity("Notice.Models.Post", b =>
                 {
                     b.Property<int>("post_id")
@@ -32,6 +50,9 @@ namespace Notice.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("post_id"));
+
+                    b.Property<int>("Category_id")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDatetime")
                         .HasColumnType("datetime2");
@@ -44,15 +65,29 @@ namespace Notice.Migrations
 
                     b.Property<string>("contents")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("post_id");
 
                     b.ToTable("Posts");
+                });
+
+            modelBuilder.Entity("Notice.Models.Category", b =>
+                {
+                    b.HasOne("Notice.Models.Category", null)
+                        .WithMany("CategoryValue")
+                        .HasForeignKey("Category_id1");
+                });
+
+            modelBuilder.Entity("Notice.Models.Category", b =>
+                {
+                    b.Navigation("CategoryValue");
                 });
 #pragma warning restore 612, 618
         }

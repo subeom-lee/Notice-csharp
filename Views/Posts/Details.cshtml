@@ -1,4 +1,4 @@
-﻿@model Notice.Models.Post
+﻿@model Notice.Models.PostDto
 
 @{
     ViewData["Title"] = "Details";
@@ -9,6 +9,12 @@
 <div>
     <hr />
     <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayName("카테고리")
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Category_Value)
+        </dd>
         <dt class="col-sm-2">
             @Html.DisplayName("조회수")
         </dt>

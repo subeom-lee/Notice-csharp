@@ -1,9 +1,8 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Notice.Models
 {
-    public class Post
+    public class PostDto
     {
         [Key]
         public int post_id { get; set; }
@@ -17,5 +16,6 @@ namespace Notice.Models
         public DateTime UpdatedDatetime { get; set; } = DateTime.Now;
         public int ViewCount { get; set; }
         public int Category_id { get; set; }
+        public string Category_Value { get; set; }
     }
 }
