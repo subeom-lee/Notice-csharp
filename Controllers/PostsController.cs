@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Drawing.Printing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,21 +28,21 @@ namespace Notice.Controllers
         // GET: Posts
         public async Task<IActionResult> Index(string searchString, string sortType, int page = 1)
         {
-            const int pageSize = 8;
+            const int pageSize = 10;
             var posts = _context.Posts.AsQueryable();
             if (!String.IsNullOrEmpty(searchString))
             {
                 posts = posts.Where(s => s.title.Contains(searchString) || s.contents.Contains(searchString));
             }
-            if (!String.IsNullOrEmpty(sortType) && sortType == "viewcount")
-            {
-                posts = posts.OrderByDescending(p => p.ViewCount);
-            }
-            else if (!String.IsNullOrEmpty(sortType) && sortType == "createdatetime")
+            if (String.IsNullOrEmpty(sortType) || sortType == "createdatetime")
             {
                 posts = posts.OrderByDescending(p => p.CreatedDatetime);
             }
-            else if (!String.IsNullOrEmpty(sortType) && sortType == "olddatetime")
+            else if (sortType == "viewcount")
+            {
+                posts = posts.OrderByDescending(p => p.ViewCount);
+            }
+            else if (sortType == "olddatetime")
             {
                 posts = posts.OrderBy(p => p.CreatedDatetime);
             }
@@ -50,7 +52,7 @@ namespace Notice.Controllers
                 Items = await posts.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(),
                 CurrentPage = page,
                 TotalPages = totalPages,
-                SearchString = searchString
+                SearchString = searchString,
             };
             return View(viewModel);
         }
@@ -61,6 +63,7 @@ namespace Notice.Controllers
             public int CurrentPage { get; set; }
             public int TotalPages { get; set; }
             public string SearchString { get; set; }
+            public string SearchCategory { get; set; }
         }
 
         // GET: Posts/Details/5
@@ -79,16 +82,51 @@ namespace Notice.Controllers
                 return NotFound();
             }
 
+            var category = await _context.Categories
+                .FirstOrDefaultAsync(p => p.Category_id == post.Category_id);
+
+            _context.Add(post);
+
+
             post.ViewCount++;
             _context.Posts.Update(post);
             await _context.SaveChangesAsync();
 
-            return View(post);
+            PostDto dto = new PostDto();
+            dto.post_id = post.post_id;
+            dto.title = post.title;
+            dto.contents = post.contents;
+            dto.CreatedDatetime = post.CreatedDatetime;
+            dto.UpdatedDatetime = post.UpdatedDatetime;
+            dto.ViewCount = post.ViewCount;
+            dto.Category_id = post.Category_id;
+            dto.Category_Value = category.CategoryValue;
+
+            return View(dto);
         }
 
         // GET: Posts/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            List<SelectListItem> items = new List<SelectListItem>();
+
+            if (_context.Categories == null)
+            {
+                return NotFound();
+            }
+
+            List<Category> categories = await _context.Categories.ToListAsync();
+            foreach (Category item in categories)
+            {
+                items.Add(new SelectListItem()
+                {
+                    Text = item.CategoryValue,
+                    Value = item.Category_id.ToString(),
+                });
+            }
+
+            ViewBag.Categories = items;
+
             return View();
         }
 
@@ -97,15 +135,17 @@ namespace Notice.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("post_id,title,contents")] Post post)
+        public async Task<IActionResult> Create([Bind("post_id, title, contents, Category_id, CategoryValue")] Post post, Category category)
         {
             if (ModelState.IsValid)
             {
-                post.CreatedDatetime = DateTime.Now;
+                post.Category_id = Convert.ToInt16(category.CategoryValue);
                 _context.Add(post);
+                //_context.Add(category);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             return View(post);
         }
 
@@ -122,6 +162,7 @@ namespace Notice.Controllers
             {
                 return NotFound();
             }
+
             return View(post);
         }
 

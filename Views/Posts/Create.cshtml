@@ -1,25 +1,38 @@
-﻿@model Notice.Models.Post
-
-@{
+﻿@{
     ViewData["Title"] = "Create";
 }
 
 <h1>작성</h1>
 
 <hr />
+
+@{
+    ViewBag.Title = "Category Select";
+}
+
+@*@using (Html.BeginForm("Create", "Posts", FormMethod.Post))
+{
+    <fieldset>
+        @Html.DropDownList("Categories")
+    </fieldset>
+    <input type="submit" value="Submit" />
+}
+*@
+
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <form method="post">
+            @Html.DropDownList("Categories")
+            <input type="text" value="0" name="CategoryValue" id="CategoryValue" required />
             <div class="form-group">
-                <label asp-for="title" class="control-label">제목</label>
-                <input asp-for="title" class="form-control" maxlength="20" required />
-                <span asp-validation-for="title" class="text-danger"></span>
+                <label class="control-label">제목</label>
+                <input type="text" name="title" class="form-control" maxlength="20" required />
+                <span class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="contents" class="control-label">내용</label>
-                <textarea asp-for="contents" class="form-control" style="resize: none;" maxlength="200" rows="6" required>></textarea>
-                <span asp-validation-for="contents" class="text-danger"></span>
+                <label class="control-label">내용</label>
+                <textarea name="contents" class="form-control" style="resize: none;" maxlength="200" rows="6" required></textarea>
+                <span class="text-danger"></span>
             </div>
             <br />
             <div class="form-group">
@@ -31,7 +44,21 @@
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <script>
+        function createPost() {
+            fetch('http://localhost:7109/Posts/Create', {
+                method: 'post'
+            }).then((res) => {
+                alert('작성되었습니다.');
+                window.location.href = '/';
+            });
+        }
+
+        var e = document.getElementById("Categories");
+        function onChange() {
+            var p = document.getElementById("CategoryValue");
+            p.value = e.value
+        }
+        e.onchange = onChange;
+    </script>
 }

@@ -35,4 +35,12 @@
     <Folder Include="Migrations\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="C:\Users\kyeongtea.lee\source\repos\Notice\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="C:\Users\kyeongtea.lee\source\repos\Notice\.editorconfig" />
+  </ItemGroup>
+
 </Project>
