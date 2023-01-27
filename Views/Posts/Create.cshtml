@@ -10,20 +10,11 @@
     ViewBag.Title = "Category Select";
 }
 
-@*@using (Html.BeginForm("Create", "Posts", FormMethod.Post))
-{
-    <fieldset>
-        @Html.DropDownList("Categories")
-    </fieldset>
-    <input type="submit" value="Submit" />
-}
-*@
-
 <div class="row">
     <div class="col-md-4">
         <form method="post">
             @Html.DropDownList("Categories")
-            <input type="text" value="0" name="CategoryValue" id="CategoryValue" required />
+            <input type="text" value="1" name="CategoryValue" id="CategoryValue" required />
             <div class="form-group">
                 <label class="control-label">제목</label>
                 <input type="text" name="title" class="form-control" maxlength="20" required />
@@ -45,15 +36,6 @@
 
 @section Scripts {
     <script>
-        function createPost() {
-            fetch('http://localhost:7109/Posts/Create', {
-                method: 'post'
-            }).then((res) => {
-                alert('작성되었습니다.');
-                window.location.href = '/';
-            });
-        }
-
         var e = document.getElementById("Categories");
         function onChange() {
             var p = document.getElementById("CategoryValue");
