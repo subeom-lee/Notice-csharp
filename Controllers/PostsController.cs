@@ -163,6 +163,27 @@ namespace Notice.Controllers
                 return NotFound();
             }
 
+            List<SelectListItem> items = new List<SelectListItem>();
+
+            if (_context.Categories == null)
+            {
+                return NotFound();
+            }
+
+            List<Category> categories = await _context.Categories.ToListAsync();
+            foreach (Category item in categories)
+            {
+                var selected = item.Category_id == post.Category_id ? true : false;
+                items.Add(new SelectListItem()
+                {
+                    Text = item.CategoryValue,
+                    Value = item.Category_id.ToString(),
+                    Selected = selected
+                });
+            }
+
+            ViewBag.Categories = items;
+
             return View(post);
         }
 
@@ -171,7 +192,7 @@ namespace Notice.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("post_id,title,contents")] Post post)
+        public async Task<IActionResult> Edit(int id, [Bind("post_id, title, contents, Category_id, CategoryValue")] Post post, Category category)
         {
             if (id != post.post_id)
             {
@@ -187,6 +208,7 @@ namespace Notice.Controllers
                     postFromDb.title = post.title;
                     postFromDb.contents = post.contents;
                     postFromDb.UpdatedDatetime = DateTime.Now;
+                    postFromDb.Category_id = Convert.ToInt16(category.CategoryValue);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
