@@ -12,7 +12,9 @@ using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 using Microsoft.Extensions.Hosting;
 using Notice.Data;
 using Notice.Models;
-
+using AutoMapper;
+using Newtonsoft.Json.Linq;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Notice.Controllers
 {
@@ -26,13 +28,13 @@ namespace Notice.Controllers
         }
 
         // GET: Posts
-        public async Task<IActionResult> Index(string searchString, string sortType, int page = 1)
+        public async Task<IActionResult> Index(string searchString, int searchCategory, string sortType, int page = 1)
         {
             const int pageSize = 10;
             var posts = _context.Posts.AsQueryable();
             if (!String.IsNullOrEmpty(searchString))
             {
-                posts = posts.Where(s => s.title.Contains(searchString) || s.contents.Contains(searchString));
+                posts = posts.Where(p => p.title.Contains(searchString) || p.contents.Contains(searchString));
             }
             if (String.IsNullOrEmpty(sortType) || sortType == "createdatetime")
             {
@@ -46,24 +48,57 @@ namespace Notice.Controllers
             {
                 posts = posts.OrderBy(p => p.CreatedDatetime);
             }
+            if (searchCategory == 0)
+            {
+                posts = posts.OrderByDescending(p => p.CreatedDatetime);
+            }
+            else if (searchCategory > posts.Max(p => p.Category_id))
+            {
+                posts = posts.OrderByDescending(p => p.CreatedDatetime);
+            }
+            else if (searchCategory != 0)
+            {
+                posts = posts.Where(p => p.Category_id == searchCategory);
+            }
             var totalPages = (int)Math.Ceiling((double)posts.Count() / pageSize);
+
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<Post, PostDto>();
+            });
+
+            IMapper mapper = config.CreateMapper();
+
+            // Table 조회
+            List<Post>? listItems = await posts.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            // 목록 조회용 모델
+            List<PostDto>? dest = mapper.Map<List<Post>?, List<PostDto>?>(listItems);
+            foreach (PostDto item in dest)
+            {
+                var category = await _context.Categories
+                //DB              찾는거
+                .FirstOrDefaultAsync(p => p.Category_id == item.Category_id);
+                item.Category_Value = category.CategoryValue;
+            }
+
             var viewModel = new PostViewModel
             {
-                Items = await posts.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(),
+                Items = dest,
                 CurrentPage = page,
                 TotalPages = totalPages,
                 SearchString = searchString,
             };
+
             return View(viewModel);
         }
 
         public class PostViewModel
         {
-            public List<Post>? Items { get; set; }
+            public List<PostDto>? Items { get; set; }
             public int CurrentPage { get; set; }
             public int TotalPages { get; set; }
             public string SearchString { get; set; }
-            public string SearchCategory { get; set; }
         }
 
         // GET: Posts/Details/5
