@@ -48,15 +48,7 @@ namespace Notice.Controllers
             {
                 posts = posts.OrderBy(p => p.CreatedDatetime);
             }
-            if (searchCategory == 0)
-            {
-                posts = posts.OrderByDescending(p => p.CreatedDatetime);
-            }
-            else if (searchCategory > posts.Max(p => p.Category_id))
-            {
-                posts = posts.OrderByDescending(p => p.CreatedDatetime);
-            }
-            else if (searchCategory != 0)
+            if (searchCategory != 0 && posts.Where(p => p.Category_id == searchCategory).Any())
             {
                 posts = posts.Where(p => p.Category_id == searchCategory);
             }
