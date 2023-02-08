@@ -21,7 +21,6 @@ namespace Notice.Controllers
         public async Task<IActionResult> Delete(string id)
         {
             string[] splitId = id.Split(",");
-            Console.WriteLine(splitId);
 
             if (_context.Posts == null)
             {
