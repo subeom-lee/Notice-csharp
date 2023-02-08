@@ -10,13 +10,13 @@
     <div class="row">
         <div class="col-lg-1 col-md-6 col-sm-12">
             <div style="float:left">
-                <button class="btn btn-primary dropdown-toggle" name="sortType" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <button class="btn btn-primary dropdown-toggle category-dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                     분류
                 </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="?searchCategory=0">전체보기</a></li>
-                    <li><a class="dropdown-item" href="?searchCategory=1">카테고리1</a></li>
-                    <li><a class="dropdown-item" href="?searchCategory=2">카테고리2</a></li>
+                <ul class="dropdown-menu category-dropdown-menu">
+                    <li><a class="dropdown-item category-dropdown-item" href="?searchCategory=0">전체보기</a></li>
+                    <li><a class="dropdown-item category-dropdown-item" href="?searchCategory=1">카테고리1</a></li>
+                    <li><a class="dropdown-item category-dropdown-item" href="?searchCategory=2">카테고리2</a></li>
                 </ul>
             </div>
         </div>
@@ -33,13 +33,13 @@
             </div>
         </div>
         <div class="col-lg-3 col-md-6 col-sm-12">
-            <button class="btn btn-primary dropdown-toggle" name="sortType" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <button class="btn btn-primary dropdown-toggle sort-dropdown" name="sortType" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 정렬
             </button>
-            <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="?sortType=viewcount">조회수순</a></li>
-                <li><a class="dropdown-item" href="?sortType=createdatetime">최신순</a></li>
-                <li><a class="dropdown-item" href="?sortType=olddatetime">오래된순</a></li>
+            <ul class="dropdown-menu sort-dropdown-menu">
+                <li><a class="dropdown-item sort-dropdown-item" href="?sortType=viewcount">조회수순</a></li>
+                <li><a class="dropdown-item sort-dropdown-item" href="?sortType=createdatetime">최신순</a></li>
+                <li><a class="dropdown-item sort-dropdown-item" href="?sortType=olddatetime">오래된순</a></li>
             </ul>
         </div>
         <div class="col-lg-5 col-md-6 col-sm-12">
@@ -155,7 +155,7 @@
                     var id = ids.join()
                     if (confirm('선택한 항목을 삭제하시겠습니까?')) {
                         $.ajax({
-                            url: 'api/Post/delete?id='+id,
+                            url: 'api/Post/delete?id=' + id,
                             type: 'DELETE',
                             success: function (result) {
                                 alert("삭제되었습니다.")
@@ -165,6 +165,45 @@
                     }
                 } else {
                     alert('삭제할 항목을 선택해주세요.');
+                }
+            });
+        });
+        $(document).ready(function () {
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+
+            const searchCategory = urlParams.get("searchCategory");
+
+            const $dropdownButton = $(".category-dropdown");
+            const $dropdownMenu = $(".category-dropdown-menu");
+            const $dropdownItems = $dropdownMenu.find(".category-dropdown-item");
+
+            $dropdownItems.each(function (index) {
+                if (index === Number(searchCategory)) {
+                    $(this).addClass("active");
+                    $dropdownButton.text($(this).text());
+                } else {
+                    $(this).removeClass("active");
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+
+            const sortType = urlParams.get("sortType");
+
+            const $dropdownButton = $(".sort-dropdown");
+            const $dropdownMenu = $(".sort-dropdown-menu");
+            const $dropdownItems = $dropdownMenu.find(".sort-dropdown-item");
+
+            $dropdownItems.each(function (index) {
+                if ($(this).attr("href") === `?sortType=${sortType}`) {
+                    $(this).addClass("active");
+                    $dropdownButton.text($(this).text());
+                } else {
+                    $(this).removeClass("active");
                 }
             });
         });
