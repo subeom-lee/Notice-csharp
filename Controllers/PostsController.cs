@@ -168,12 +168,34 @@ namespace Notice.Controllers
             {
                 post.Category_id = Convert.ToInt16(category.CategoryValue);
                 _context.Add(post);
-                //_context.Add(category);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
 
             return View(post);
+        }
+
+        public async Task<IActionResult> UploadFiles(IFormFile uploadfile)
+        {
+            // 파일이 업로드 되는 경로
+            var uploadPath = "d:\\upload";
+            try
+            {
+                // 파일들의 이름이 중복되지 않게 [현재시각 + file이름] 으로 파일명을 변경해준다.
+                var convertFileName = DateTime.Now.ToString("yyyyMMddHHmmss_") + uploadfile.FileName;
+                // 파일 경로는 uploadPath, 이름은 convertFileName
+                var filePath = System.IO.Path.Combine(uploadPath, convertFileName);
+                // 파일을 저장하는 부분
+                using (var stream = System.IO.File.Create(filePath))
+                {
+                    await uploadfile.CopyToAsync(stream);
+                }
+            }
+            catch (Exception)
+            {
+                return StatusCode(500);
+            }
+            return Ok();
         }
 
         // GET: Posts/Edit/5
