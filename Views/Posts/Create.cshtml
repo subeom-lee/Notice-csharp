@@ -10,8 +10,70 @@
     ViewBag.Title = "Category Select";
 }
 
+<style>
+    .dropzone {
+        width: 98%;
+        margin: 1%;
+        border: 2px dashed #3498db !important;
+        border-radius: 5px;
+        -webkit-transition: .2s;
+        transition: .2s;
+    }
+
+        .dropzone.dz-drag-hover {
+            border: 2px solid #3498db !important;
+        }
+
+    .dz-message.needsclick img {
+        width: 50px;
+        display: block;
+        margin: auto;
+        opacity: .6;
+        margin-bottom: 15px;
+    }
+
+    span.plus {
+        display: none;
+    }
+
+    .dropzone.dz-started .dz-message {
+        display: inline-block !important;
+        width: 120px;
+        float: right;
+        border: 1px solid rgba(238, 238, 238, 0.36);
+        border-radius: 30px;
+        height: 120px;
+        margin: 16px;
+        -webkit-transition: .2s;
+        transition: .2s;
+    }
+
+        .dropzone.dz-started .dz-message span.text {
+            display: none;
+        }
+
+        .dropzone.dz-started .dz-message span.plus {
+            display: block;
+            font-size: 70px;
+            color: #AAA;
+            line-height: 110px;
+        }
+</style>
+
 <div class="row">
     <div class="col-md-4">
+        <div id="dropzone">
+            <form action="https://localhost:7109/uploadFile" class="dropzone" id="myDropzone" enctype="multipart/form-data">
+                <div class="dz-message needsclick">
+                    <span class="text">
+                        <img src="https://www.freeiconspng.com/uploads/------------------------------iconpngm--22.png" alt="Camera" />
+                        파일을 여기에 놓거나 클릭하여 업로드합니다.
+                    </span>
+                    <span class="plus">+</span>
+                </div>
+            </form>
+        </div>
+        <button class="btn btn-primary" id="submit-all">업로드</button>
         <form method="post">
             @Html.DropDownList("Categories")
             <input type="text" value="1" name="CategoryValue" id="CategoryValue" required />
@@ -42,5 +104,67 @@
             p.value = e.value
         }
         e.onchange = onChange;
+
+        // Specification : [
+        //     파일 썸네일 생성,
+        //     업로드 후 파일 삭제버튼,
+        //     API에 넘기는 주소 : uploadFile,
+        //     파일 최대 첨부 가능 개수 : 3,
+        //     파일 최대 용량 : 100 MB,
+        //     파일 최대 첨부 가능 개수 초과시 에러메시지 출력 + 파일 첨부 불가능,
+        //     파일 최대 용량 초과시 에러메시지 출력 + 파일 첨부 불가능,
+        //     그 밖의 알수없는 에러 발생시 에러메시지 출력
+        // ]
+
+        Dropzone.autoDiscover = false;
+
+        var dropzone = new Dropzone('.dropzone', {
+            createImageThumbnails: true, // 파일 썸네일 생성
+            url: 'UploadFiles', // 파일을 업로드할 서버 주소
+            addRemoveLinks: true, // 업로드 후 파일 삭제버튼 표시 여부
+            // dictRemoveFile: '삭제', // 삭제버튼 표시 텍스트
+            autoProcessQueue: true, // false: dropzone에 올리면 자동으로 서버에 전송 / true: this.processQueue() 호출시 전송
+            paramName: "uploadFile", // api에 넘길때 주소
+            maxFiles: 3, // 파일 갯수
+            maxFilesize: 100, // 파일 용량 MB단위
+            timeout: 300000, // 커넥션 타임아웃 설정 -> 데이터가 클 경우 300초 기다리기
+
+            init: function () {
+                var myDropzone = this;
+                // addRemoveLinks를 true로 설정하고 dictRemoveFile(삭제버튼 텍스트)를 '삭제' 로 아무리 설정해 봐도 안먹어서
+                // option에 기본으로 되어있는 CancelUpload를 '삭제' 로 변경하고 alert창도 제어
+                myDropzone.options.addRemoveLinks = true;
+                myDropzone.options.dictCancelUpload = '삭제';
+                myDropzone.options.dictCancelUploadConfirmation = '이 업로드를 취소하시겠습니까?';
+                myDropzone.options.dictUploadCanceled = '업로드 취소됨';
+
+                // 업로드 버튼 클릭 시 processQueue() 함수 호출로 서버에 데이터 전송
+                document.querySelector("#submit-all").addEventListener("click", function () {
+                    console.log('업로드');
+                    myDropzone.processQueue();
+                });
+                console.log('최초 실행');
+                this.on('sending', function (file, xhr, formData) {
+                    console.log('보내는중');
+                });
+                this.on('success', function (file, responseText) {
+                    console.log('성공');
+                });
+                this.on('maxfilesexceeded', function (file) {
+                    this.removeFile(file);
+                    alert('최대' + this.options.maxFiles + ' 개의 파일만 업로드할 수 있습니다.');
+                });
+                this.on('error', function (file, errorMessage) {
+                    if (file.size > this.options.maxFilesize * 1024 * 1024) {
+                        this.removeFile(file);
+                        alert('업로드 파일은' + this.options.maxFilesize + ' MB 이하만 가능합니다.');
+                        // 에러 메시지가 파일을 더 넣을수 없다고 기본값으로 날아올 때가 아닐 때 alert을 errorMessage로 띄운다.
+                    } else if (errorMessage !== 'You can not upload any more files.') {
+                        this.removeFile(file);
+                        alert(errorMessage);
+                    }
+                });
+            }
+        });
     </script>
 }
