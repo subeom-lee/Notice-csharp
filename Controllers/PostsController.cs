@@ -161,9 +161,27 @@ namespace Notice.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("post_id, title, contents, Category_id, CategoryValue")] Post post, Category category)
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(IFormFile uploadfile, [FromForm] Post post, [FromForm] Category category)
         {
+            // 파일이 업로드 되는 경로
+            var uploadPath = "d:\\upload";
+            try
+            {
+                // 파일들의 이름이 중복되지 않게 [현재시각 + file이름] 으로 파일명을 변경해준다.
+                var convertFileName = DateTime.Now.ToString("yyyyMMddHHmmss_") + uploadfile.FileName;
+                // 파일 경로는 uploadPath, 이름은 convertFileName
+                var filePath = System.IO.Path.Combine(uploadPath, convertFileName);
+                // 파일을 저장하는 부분
+                using (var stream = System.IO.File.Create(filePath))
+                {
+                    await uploadfile.CopyToAsync(stream);
+                }
+            }
+            catch (Exception)
+            {
+                return StatusCode(500);
+            }
             if (ModelState.IsValid)
             {
                 post.Category_id = Convert.ToInt16(category.CategoryValue);
@@ -171,7 +189,6 @@ namespace Notice.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-
             return View(post);
         }
 
