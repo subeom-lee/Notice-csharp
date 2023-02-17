@@ -34,6 +34,17 @@ namespace Notice.Migrations
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
 
+                    b.Property<string>("File_name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("File_path")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("post_id")
+                        .HasColumnType("int");
+
                     b.HasKey("File_id");
 
                     b.ToTable("Attachfiles");

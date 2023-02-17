@@ -12,8 +12,8 @@ using Notice.Data;
 namespace Notice.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230209015033_filetest3")]
-    partial class filetest3
+    [Migration("20230216040333_Delete_File_column_in_Post_model")]
+    partial class DeleteFilecolumninPostmodel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,6 +36,13 @@ namespace Notice.Migrations
                     b.Property<byte[]>("File_data")
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("File_name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("post_id")
+                        .HasColumnType("int");
 
                     b.HasKey("File_id");
 

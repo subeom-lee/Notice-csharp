@@ -69,6 +69,7 @@
     <div class="col-md-4">
         <div id="dropzone">
             <form action="https://localhost:7109/Posts/Create" class="dropzone" id="myDropzone" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
                 <div class="dz-message needsclick">
                     <span class="text">
                         <img src="https://www.freeiconspng.com/uploads/------------------------------iconpngm--22.png" alt="Camera" />
@@ -79,7 +80,7 @@
             </form>
         </div>
         @Html.DropDownList("Categories")
-        <input type="text" value="1" name="CategoryValue" id="CategoryValue" required />
+        <input type="hidden" value="1" name="CategoryValue" id="CategoryValue" required />
         <div>
             <label class="control-label">제목</label>
             <input id="title" name="title" type="text" class="form-control" maxlength="20" required />
@@ -128,9 +129,11 @@
             dictRemoveFile: '업로드 취소', // 삭제버튼 표시 텍스트
             autoProcessQueue: false, // false: this.processQueue() 호출시 전송 / true: dropzone에 올리면 자동으로 서버에 전송
             paramName: "uploadFile", // formdata 이름
-            maxFiles: 1, // 파일 갯수
-            maxFilesize: 1, // 파일 용량 MB단위
+            maxFiles: 3, // 파일 갯수
+            maxFilesize: 100, // 파일 용량 MB단위
             timeout: 300000, // 커넥션 타임아웃 설정 -> 데이터가 클 경우 300초 기다리기
+            uploadMultiple: true, // 다중 업로드 기능
+            parallelUploads: 2, // 동시 파일 업로드 수
 
             init: function () {
                 var myDropzone = this;
@@ -138,16 +141,40 @@
                 document.querySelector("#submit-all").addEventListener("click", function (e) {
                     // 이벤트가 있어야 실행?
                     e.preventDefault();
-                    myDropzone.processQueue();
+
+                    if (myDropzone.files.length == 0) {
+                        var formData = new FormData();
+                        formData.append('title', document.getElementById('title').value);
+                        formData.append('contents', document.getElementById('contents').value);
+                        formData.append('CategoryValue', document.getElementById('CategoryValue').value);
+
+                        fetch('Create', {
+                            method: 'POST',
+                            headers: {
+                                'RequestVerificationToken': document.getElementsByName("__RequestVerificationToken")[1].value
+                            },
+                            body: formData,
+                            contentType: false
+                        })
+                            .then((SUCCESS) => {
+                                window.location.href = '/'
+                            })
+                    } else {
+                        myDropzone.processQueue();
+                    }
                 });
                 this.on('sending', function (file, xhr, formData) {
-                    // title, contents, category를 formData로 만들어서 서버에 보내기
-                    formData.append('title', document.getElementById('title'));
-                    formData.append('contents', document.getElementById('contents'));
-                    formData.append('CategoryValue', document.getElementById('CategoryValue'));
+                    // foemData에 Validate 넣기
+                    formData["__RequestAntiForgeryToken"] = document.getElementsByName("__RequestVerificationToken")[1].value;
+                    console.log('보내는 중')
+                    //title, contents, category를 formData로 만들어서 서버에 보내기
+                    formData.append('title', document.getElementById('title').value);
+                    formData.append('contents', document.getElementById('contents').value);
+                    formData.append('CategoryValue', document.getElementById('CategoryValue').value);
                 });
                 this.on('success', function (file, responseText) {
                     console.log('성공');
+                    window.location.href = '/'
                 });
                 this.on('maxfilesexceeded', function (file) {
                     this.removeFile(file);

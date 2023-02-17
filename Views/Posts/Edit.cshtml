@@ -14,7 +14,7 @@
             @Html.DropDownList("Categories")
             <input type="hidden" asp-for="post_id" />
             <input type="hidden" asp-for="Category_id" />
-            <input type="text" asp-for="Category_id" name="CategoryValue" id="CategoryValue" required />
+            <input type="hidden" asp-for="Category_id" name="CategoryValue" id="CategoryValue" required />
             <div class="form-group">
                 <label class="control-label">제목</label>
                 <input asp-for="title" type="text" name="title" class="form-control" maxlength="20" required />

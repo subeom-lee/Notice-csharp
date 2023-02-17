@@ -59,6 +59,9 @@
                 @Html.DisplayName("선택")
             </th>
             <th style="text-align:center;">
+                @Html.DisplayName("📎")
+            </th>
+            <th style="text-align:center;">
                 @Html.DisplayName("카테고리")
             </th>
             <th style="text-align:center;">
@@ -81,6 +84,15 @@
             <tr>
                 <td style="text-align:center; vertical-align: middle;">
                     <input id="checkBoxId@(item.post_id)" class="form-check-input chkId" type="checkbox" data-item-id="@item.post_id">
+                </td>
+                <td style="text-align:center; vertical-align: middle;">
+                    @if (item.IsFile == true)
+                    {
+                        <p>📎</p>
+                    } else
+                    {
+                        <p></p>
+                    }
                 </td>
                 <td style="text-align:center; vertical-align: middle;">
                     @Html.DisplayFor(modelItem => item.Category_Value)

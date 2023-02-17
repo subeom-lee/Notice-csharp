@@ -15,6 +15,8 @@ using Notice.Models;
 using AutoMapper;
 using Newtonsoft.Json.Linq;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.CodeAnalysis;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Notice.Controllers
 {
@@ -72,6 +74,12 @@ namespace Notice.Controllers
                 //DB              찾는거
                 .FirstOrDefaultAsync(p => p.Category_id == item.Category_id);
                 item.Category_Value = category.CategoryValue;
+                var post = await _context.Attachfiles
+                    .FirstOrDefaultAsync(p => p.post_id == item.post_id);
+                if (post != null)
+                {
+                    item.IsFile = true;
+                }
             }
 
             var viewModel = new PostViewModel
@@ -111,25 +119,64 @@ namespace Notice.Controllers
 
             var category = await _context.Categories
                 .FirstOrDefaultAsync(p => p.Category_id == post.Category_id);
-
             _context.Add(post);
 
+            // 현재 페이지에 해당하는 post_id값을 가지고 있는 파일들 배열로 가져오기
+            var attachfiles = await _context.Attachfiles
+                .Where(p => p.post_id == id)
+                .ToListAsync();
 
             post.ViewCount++;
             _context.Posts.Update(post);
             await _context.SaveChangesAsync();
 
-            PostDto dto = new PostDto();
-            dto.post_id = post.post_id;
-            dto.title = post.title;
-            dto.contents = post.contents;
-            dto.CreatedDatetime = post.CreatedDatetime;
-            dto.UpdatedDatetime = post.UpdatedDatetime;
-            dto.ViewCount = post.ViewCount;
-            dto.Category_id = post.Category_id;
-            dto.Category_Value = category.CategoryValue;
+            // 배열에 요소 넣기
+            List<AttachfileDto> attachfileDto = new List<AttachfileDto>();
+            foreach (var attachfile in attachfiles)
+            {
+                attachfileDto.Add(new AttachfileDto
+                {
+                    File_id = attachfile.File_id,
+                    File_name = attachfile.File_name,
+                    File_path = attachfile.File_path
+                });
+            }
 
-            return View(dto);
+            // PostDto에 배열에 요소 넣은 모델 넣기
+            PostDto PostDto = new PostDto();
+            PostDto.post_id = post.post_id;
+            PostDto.title = post.title;
+            PostDto.contents = post.contents;
+            PostDto.CreatedDatetime = post.CreatedDatetime;
+            PostDto.UpdatedDatetime = post.UpdatedDatetime;
+            PostDto.ViewCount = post.ViewCount;
+            PostDto.Category_id = post.Category_id;
+            PostDto.Category_Value = category.CategoryValue;
+            PostDto.Attachfiles = attachfileDto;
+
+            // 첨부파일이 없을 때 허용
+            if (attachfiles == null)
+            {
+                return View(PostDto);
+            }
+
+            return View(PostDto);
+        }
+
+        // 파일 다운로드
+        public async Task<ActionResult?> Download(int Downloadfile)
+        {
+            // View에서 File_id값을 넘겨받은걸로 파일 객체 가져오기
+            var fileId = await _context.Attachfiles.FirstOrDefaultAsync(p => p.File_id == Downloadfile);
+            if (fileId != null)
+            {
+                string fileName = fileId.File_name;
+                string filePath = fileId.File_path;
+                byte[] bytes = System.IO.File.ReadAllBytes(filePath);
+                return File(bytes, "application/octet-stream", fileName);
+            }
+
+            return null;
         }
 
         // GET: Posts/Create
@@ -161,58 +208,50 @@ namespace Notice.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        //[ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(IFormFile uploadfile, [FromForm] Post post, [FromForm] Category category)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([FromForm] Post post, [FromForm] Category category, ICollection<IFormFile>? uploadfile = null)
         {
-            // 파일이 업로드 되는 경로
-            var uploadPath = "d:\\upload";
-            try
-            {
-                // 파일들의 이름이 중복되지 않게 [현재시각 + file이름] 으로 파일명을 변경해준다.
-                var convertFileName = DateTime.Now.ToString("yyyyMMddHHmmss_") + uploadfile.FileName;
-                // 파일 경로는 uploadPath, 이름은 convertFileName
-                var filePath = System.IO.Path.Combine(uploadPath, convertFileName);
-                // 파일을 저장하는 부분
-                using (var stream = System.IO.File.Create(filePath))
-                {
-                    await uploadfile.CopyToAsync(stream);
-                }
-            }
-            catch (Exception)
-            {
-                return StatusCode(500);
-            }
             if (ModelState.IsValid)
             {
                 post.Category_id = Convert.ToInt16(category.CategoryValue);
                 _context.Add(post);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
             }
-            return View(post);
-        }
 
-        public async Task<IActionResult> UploadFiles(IFormFile uploadfile)
-        {
-            // 파일이 업로드 되는 경로
+            var files = HttpContext.Request.Form.Files;
             var uploadPath = "d:\\upload";
-            try
+            if (uploadfile != null)
             {
-                // 파일들의 이름이 중복되지 않게 [현재시각 + file이름] 으로 파일명을 변경해준다.
-                var convertFileName = DateTime.Now.ToString("yyyyMMddHHmmss_") + uploadfile.FileName;
-                // 파일 경로는 uploadPath, 이름은 convertFileName
-                var filePath = System.IO.Path.Combine(uploadPath, convertFileName);
-                // 파일을 저장하는 부분
-                using (var stream = System.IO.File.Create(filePath))
+                try
                 {
-                    await uploadfile.CopyToAsync(stream);
+                    for (var i = 0; i < files.Count; i++)
+                    {
+                        var file = files[i];
+                        var convertFileName = DateTime.Now.ToString("yyyyMMddHHmmss_") + file.FileName;
+                        var filePath = System.IO.Path.Combine(uploadPath, convertFileName);
+                        using (var stream = System.IO.File.Create(filePath))
+                        {
+                            await file.CopyToAsync(stream);
+                        }
+                        // Attachfile 모델에 파일 데이터 저장
+                        var attachFile = new Attachfile
+                        {
+                            File_data = System.IO.File.ReadAllBytes(filePath),
+                            File_name = file.FileName,
+                            File_path = uploadPath + '/' + convertFileName,
+                            post_id = post.post_id
+                        };
+
+                        _context.Attach(attachFile);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+                catch (Exception)
+                {
+                    return StatusCode(500);
                 }
             }
-            catch (Exception)
-            {
-                return StatusCode(500);
-            }
-            return Ok();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Posts/Edit/5
@@ -336,5 +375,3 @@ namespace Notice.Controllers
         }
     }
 }
-
-// Test
