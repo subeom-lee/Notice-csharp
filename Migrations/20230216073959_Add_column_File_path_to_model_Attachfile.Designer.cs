@@ -12,8 +12,8 @@ using Notice.Data;
 namespace Notice.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230120041529_update_category")]
-    partial class updatecategory
+    [Migration("20230216073959_Add_column_File_path_to_model_Attachfile")]
+    partial class AddcolumnFilepathtomodelAttachfile
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,6 +25,34 @@ namespace Notice.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Notice.Models.Attachfile", b =>
+                {
+                    b.Property<int>("File_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("File_id"));
+
+                    b.Property<byte[]>("File_data")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("File_name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("File_path")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("post_id")
+                        .HasColumnType("int");
+
+                    b.HasKey("File_id");
+
+                    b.ToTable("Attachfiles");
+                });
+
             modelBuilder.Entity("Notice.Models.Category", b =>
                 {
                     b.Property<int>("Category_id")
@@ -35,7 +63,8 @@ namespace Notice.Migrations
 
                     b.Property<string>("CategoryValue")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Category_id");
 

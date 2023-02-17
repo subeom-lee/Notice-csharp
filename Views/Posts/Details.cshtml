@@ -39,6 +39,22 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.CreatedDatetime)
         </dd>
+        @*첨부파일이 있을때 첨부파일을 보여주기*@
+        @if (Model.Attachfiles != null && Model.Attachfiles.Any())
+        {
+            <dt class="col-sm-2">
+                @Html.DisplayName("첨부파일")
+            </dt>
+            <dd class="col-sm-10 att">
+                @*첨부파일 배열 가져와서 분해하기*@
+                @for (int i = 0; i < Model.Attachfiles.Count; i++)
+                {                                           @*첨부파일 클릭한 해당 File_id 넘겨주기*@
+                    <a href="@Url.Action("Download", new { Downloadfile = Model.Attachfiles[i].File_id })">@Model.Attachfiles[i].File_name</a>
+
+                    <br />
+                }
+            </dd>
+        }
     </dl>
 </div>
 <div>
@@ -46,3 +62,7 @@
     <a class="btn btn-danger" asp-action="Delete" asp-route-id="@Model?.post_id">삭제</a> |
     <a class="btn btn-primary" asp-action="Index" asp-route-page="@ViewBag.CurrentPage">목록으로</a>
 </div>
+
+@section Scripts {
+
+}

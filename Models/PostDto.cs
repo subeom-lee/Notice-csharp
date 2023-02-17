@@ -17,5 +17,7 @@ namespace Notice.Models
         public int ViewCount { get; set; }
         public int Category_id { get; set; }
         public string Category_Value { get; set; }
+        public bool IsFile { get; set; }
+        public List<AttachfileDto>? Attachfiles { get; set; }
     }
 }

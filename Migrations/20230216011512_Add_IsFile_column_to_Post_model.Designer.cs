@@ -12,8 +12,8 @@ using Notice.Data;
 namespace Notice.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230120015646_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20230216011512_Add_IsFile_column_to_Post_model")]
+    partial class AddIsFilecolumntoPostmodel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,6 +25,33 @@ namespace Notice.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Notice.Models.Attachfile", b =>
+                {
+                    b.Property<int>("File_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("File_id"));
+
+                    b.Property<byte[]>("File_data")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("File_name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsFile")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("post_id")
+                        .HasColumnType("int");
+
+                    b.HasKey("File_id");
+
+                    b.ToTable("Attachfiles");
+                });
+
             modelBuilder.Entity("Notice.Models.Category", b =>
                 {
                     b.Property<int>("Category_id")
@@ -33,12 +60,12 @@ namespace Notice.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Category_id"));
 
-                    b.Property<int?>("Category_id1")
-                        .HasColumnType("int");
+                    b.Property<string>("CategoryValue")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Category_id");
-
-                    b.HasIndex("Category_id1");
 
                     b.ToTable("Categories");
                 });
@@ -56,6 +83,9 @@ namespace Notice.Migrations
 
                     b.Property<DateTime>("CreatedDatetime")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsFile")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("UpdatedDatetime")
                         .HasColumnType("datetime2");
@@ -76,18 +106,6 @@ namespace Notice.Migrations
                     b.HasKey("post_id");
 
                     b.ToTable("Posts");
-                });
-
-            modelBuilder.Entity("Notice.Models.Category", b =>
-                {
-                    b.HasOne("Notice.Models.Category", null)
-                        .WithMany("CategoryValue")
-                        .HasForeignKey("Category_id1");
-                });
-
-            modelBuilder.Entity("Notice.Models.Category", b =>
-                {
-                    b.Navigation("CategoryValue");
                 });
 #pragma warning restore 612, 618
         }
