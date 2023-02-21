@@ -373,6 +373,17 @@ namespace Notice.Controllers
                 foreach (var deleteFileId in array)
                 {
                     var intFileId = int.Parse(deleteFileId);
+                    var filePaths = await _context.Attachfiles
+                        .Where(p => p.File_id == intFileId)
+                        .Select(p => p.File_path)
+                        .ToListAsync();
+                    foreach (var filePath in filePaths)
+                    {
+                        if (System.IO.File.Exists(filePath))
+                        {
+                            System.IO.File.Delete(filePath);
+                        }
+                    }
                     var deleteAttachFileId = await _context.Attachfiles.FindAsync(intFileId);
                     if (deleteAttachFileId != null)
                     {

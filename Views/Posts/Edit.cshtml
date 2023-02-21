@@ -187,6 +187,7 @@
                     formData.append('CategoryValue', document.getElementById('CategoryValue').value);
                     formData.append('post_id', document.querySelector('input[name="post_id"]').value);
                     formData.append('Category_id', document.querySelector('input[name="Category_id"]').value);
+                    formData.append('File_id', document.querySelector('input[name="File_id"]').value);
                 });
                 this.on('success', function (file, responseText) {
                     console.log('성공');
