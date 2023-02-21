@@ -119,21 +119,19 @@
         //     그 밖의 알수없는 에러 발생시 에러메시지 출력
         // ]
 
-
-
         Dropzone.options.myDropzone = {
             createImageThumbnails: true, // 파일 썸네일 생성
             url: 'https://localhost:7109/Posts/Create', // 파일을 업로드할 서버 주소
-            method: 'post',
+            method: 'POST', // Controller에 넘길 메소드
             addRemoveLinks: true, // 업로드 후 파일 삭제버튼 표시 여부
             dictRemoveFile: '업로드 취소', // 삭제버튼 표시 텍스트
             autoProcessQueue: false, // false: this.processQueue() 호출시 전송 / true: dropzone에 올리면 자동으로 서버에 전송
             paramName: "uploadFile", // formdata 이름
-            maxFiles: 3, // 파일 갯수
+            maxFiles: 3, // 파일 개수
             maxFilesize: 100, // 파일 용량 MB단위
             timeout: 300000, // 커넥션 타임아웃 설정 -> 데이터가 클 경우 300초 기다리기
             uploadMultiple: true, // 다중 업로드 기능
-            parallelUploads: 2, // 동시 파일 업로드 수
+            parallelUploads: 3, // 동시 파일 업로드 수
 
             init: function () {
                 var myDropzone = this;
@@ -142,6 +140,7 @@
                     // 이벤트가 있어야 실행?
                     e.preventDefault();
 
+                    // 파일 업로드를 안할 때
                     if (myDropzone.files.length == 0) {
                         var formData = new FormData();
                         formData.append('title', document.getElementById('title').value);
@@ -167,7 +166,7 @@
                     // foemData에 Validate 넣기
                     formData["__RequestAntiForgeryToken"] = document.getElementsByName("__RequestVerificationToken")[1].value;
                     console.log('보내는 중')
-                    //title, contents, category를 formData로 만들어서 서버에 보내기
+                    // title, contents, category를 formData로 만들어서 서버에 보내기
                     formData.append('title', document.getElementById('title').value);
                     formData.append('contents', document.getElementById('contents').value);
                     formData.append('CategoryValue', document.getElementById('CategoryValue').value);

@@ -111,7 +111,7 @@ namespace Notice.Controllers
             }
 
             var post = await _context.Posts
-                .FirstOrDefaultAsync(m => m.post_id == id);
+                .FirstOrDefaultAsync(p => p.post_id == id);
             if (post == null)
             {
                 return NotFound();
@@ -138,7 +138,7 @@ namespace Notice.Controllers
                 {
                     File_id = attachfile.File_id,
                     File_name = attachfile.File_name,
-                    File_path = attachfile.File_path
+                    File_path = attachfile.File_path,
                 });
             }
 
@@ -220,36 +220,33 @@ namespace Notice.Controllers
 
             var files = HttpContext.Request.Form.Files;
             var uploadPath = "d:\\upload";
-            if (uploadfile != null)
+            try
             {
-                try
+                for (var i = 0; i < files.Count; i++)
                 {
-                    for (var i = 0; i < files.Count; i++)
+                    var file = files[i];
+                    var convertFileName = DateTime.Now.ToString("yyyyMMddHHmmss_") + file.FileName;
+                    var filePath = System.IO.Path.Combine(uploadPath, convertFileName);
+                    using (var stream = System.IO.File.Create(filePath))
                     {
-                        var file = files[i];
-                        var convertFileName = DateTime.Now.ToString("yyyyMMddHHmmss_") + file.FileName;
-                        var filePath = System.IO.Path.Combine(uploadPath, convertFileName);
-                        using (var stream = System.IO.File.Create(filePath))
-                        {
-                            await file.CopyToAsync(stream);
-                        }
-                        // Attachfile 모델에 파일 데이터 저장
-                        var attachFile = new Attachfile
-                        {
-                            File_data = System.IO.File.ReadAllBytes(filePath),
-                            File_name = file.FileName,
-                            File_path = uploadPath + '/' + convertFileName,
-                            post_id = post.post_id
-                        };
-
-                        _context.Attach(attachFile);
-                        await _context.SaveChangesAsync();
+                        await file.CopyToAsync(stream);
                     }
+                    // Attachfile 모델에 파일 데이터 저장
+                    var attachFile = new Attachfile
+                    {
+                        File_data = System.IO.File.ReadAllBytes(filePath),
+                        File_name = file.FileName,
+                        File_path = uploadPath + '/' + convertFileName,
+                        post_id = post.post_id
+                    };
+
+                    _context.Attach(attachFile);
+                    await _context.SaveChangesAsync();
                 }
-                catch (Exception)
-                {
-                    return StatusCode(500);
-                }
+            }
+            catch (Exception)
+            {
+                return StatusCode(500);
             }
             return RedirectToAction(nameof(Index));
         }
@@ -292,12 +289,23 @@ namespace Notice.Controllers
             return View(post);
         }
 
-        // POST: Posts/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpGet]
+        public IActionResult GetFiles(int id)
+        {
+            var files = _context.Attachfiles.Where(p => p.post_id == id).ToList();
+            var result = files.Select(p => new
+            {
+                file_id = p.File_id,
+                file_name = p.File_name,
+                file_size = p.File_data.Length
+            });
+            Console.WriteLine(result);
+            return Json(result);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("post_id, title, contents, Category_id, CategoryValue")] Post post, Category category)
+        public async Task<IActionResult> Edit(int id, [FromForm] Post post, [FromForm] Category category, [FromForm] string? File_id = null, ICollection<IFormFile>? attachfile = null)
         {
             if (id != post.post_id)
             {
@@ -309,7 +317,7 @@ namespace Notice.Controllers
                 try
                 {
                     post.UpdatedDatetime = DateTime.Now;
-                    var postFromDb = await _context.Posts.FirstOrDefaultAsync(x => x.post_id == post.post_id);
+                    var postFromDb = await _context.Posts.FirstOrDefaultAsync(p => p.post_id == post.post_id);
                     postFromDb.title = post.title;
                     postFromDb.contents = post.contents;
                     postFromDb.UpdatedDatetime = DateTime.Now;
@@ -327,9 +335,53 @@ namespace Notice.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
-            return View(post);
+            var files = HttpContext.Request.Form.Files;
+            var uploadPath = "d:\\upload";
+            try
+            {
+                for (var i = 0; i < files.Count; i++)
+                {
+                    var file = files[i];
+                    var convertFileName = DateTime.Now.ToString("yyyyMMddHHmmss_") + file.FileName;
+                    var filePath = System.IO.Path.Combine(uploadPath, convertFileName);
+                    using (var stream = System.IO.File.Create(filePath))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                    // Attachfile 모델에 파일 데이터 저장
+                    var attachFile = new Attachfile
+                    {
+                        File_data = System.IO.File.ReadAllBytes(filePath),
+                        File_name = file.FileName,
+                        File_path = uploadPath + '/' + convertFileName,
+                        post_id = post.post_id
+                    };
+
+                    _context.Attach(attachFile);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+                return StatusCode(500);
+            }
+            if (File_id != null)
+            {
+                string[] fileIds = File_id.Split(',');
+                var array = fileIds.Skip(1).ToArray();
+                foreach (var deleteFileId in array)
+                {
+                    var intFileId = int.Parse(deleteFileId);
+                    var deleteAttachFileId = await _context.Attachfiles.FindAsync(intFileId);
+                    if (deleteAttachFileId != null)
+                    {
+                        _context.Remove(deleteAttachFileId);
+                    }
+                    await _context.SaveChangesAsync();
+                }
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Posts/Delete/5
@@ -341,7 +393,7 @@ namespace Notice.Controllers
             }
 
             var post = await _context.Posts
-                .FirstOrDefaultAsync(m => m.post_id == id);
+                .FirstOrDefaultAsync(p => p.post_id == id);
             if (post == null)
             {
                 return NotFound();
@@ -359,6 +411,30 @@ namespace Notice.Controllers
             {
                 return Problem("Entity set 'ApplicationDbContext.Posts'  is null.");
             }
+            // model을 이용한 실제 파일 삭제
+            // Attachfiles모델에 지우려는 post_id가 가지고 있는 file_path를 배열로 선택
+            var filePaths = await _context.Attachfiles
+                .Where(p => p.post_id == id)
+                .Select(p => p.File_path)
+                .ToListAsync();
+            // 배열로 된 file_path를 한개씩 나눠서 실제 파일이 존재한다면 삭제
+            foreach (var filePath in filePaths)
+            {
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                }
+            }
+            // File_id 삭제
+            // Attachfiles모델에 지우려는 post_id가 가지고 있는 file_id를 배열로 선택
+            var attachfiles = await _context.Attachfiles
+                .Where(p => p.post_id == id)
+                .ToListAsync();
+            // 배열로 된 file_id를 한개씩 나눠서 삭제
+            foreach (var attachfile in attachfiles)
+            {
+                _context.Attachfiles.Remove(attachfile);
+            }
             var post = await _context.Posts.FindAsync(id);
             if (post != null)
             {
@@ -371,7 +447,7 @@ namespace Notice.Controllers
 
         private bool PostExists(int id)
         {
-            return _context.Posts.Any(e => e.post_id == id);
+            return _context.Posts.Any(p => p.post_id == id);
         }
     }
 }
