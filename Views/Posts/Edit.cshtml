@@ -8,29 +8,95 @@
 
 <hr />
 
+@using (Html.BeginForm("Upload", "RX", FormMethod.Post, new { id = "frmRXUpload", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+}
+
+<style>
+    .dropzone {
+        width: 98%;
+        margin: 1%;
+        border: 2px dashed #3498db !important;
+        border-radius: 5px;
+        -webkit-transition: .2s;
+        transition: .2s;
+    }
+
+        .dropzone.dz-drag-hover {
+            border: 2px solid #3498db !important;
+        }
+
+    .dz-message.needsclick img {
+        width: 50px;
+        display: block;
+        margin: auto;
+        opacity: .6;
+        margin-bottom: 15px;
+    }
+
+    span.plus {
+        display: none;
+    }
+
+    .dropzone.dz-started .dz-message {
+        display: inline-block !important;
+        width: 120px;
+        float: right;
+        border: 1px solid rgba(238, 238, 238, 0.36);
+        border-radius: 30px;
+        height: 120px;
+        margin: 16px;
+        -webkit-transition: .2s;
+        transition: .2s;
+    }
+
+        .dropzone.dz-started .dz-message span.text {
+            display: none;
+        }
+
+        .dropzone.dz-started .dz-message span.plus {
+            display: block;
+            font-size: 70px;
+            color: #AAA;
+            line-height: 110px;
+        }
+</style>
+
 <div class="row">
     <div class="col-md-4">
-        <form method="post">
-            @Html.DropDownList("Categories")
-            <input type="hidden" asp-for="post_id" />
-            <input type="hidden" asp-for="Category_id" />
-            <input type="hidden" asp-for="Category_id" name="CategoryValue" id="CategoryValue" required />
-            <div class="form-group">
-                <label class="control-label">제목</label>
-                <input asp-for="title" type="text" name="title" class="form-control" maxlength="20" required />
-                <span class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label class="control-label">내용</label>
-                <textarea asp-for="contents" name="contents" class="form-control" style="resize: none;" maxlength="200" rows="6" required></textarea>
-                <span class="text-danger"></span>
-            </div>
-            <br />
-            <div class="form-group">
-                <input type="submit" value="수정" class="btn btn-success" /> |
-                <a class="btn btn-primary" asp-action="Index">목록으로</a>
-            </div>
-        </form>
+        <div id="dropzone">
+            <form action="https://localhost:7109/Posts/Edit" class="dropzone" id="myDropzone" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="dz-message needsclick">
+                    <span class="text">
+                        <img src="https://www.freeiconspng.com/uploads/------------------------------iconpngm--22.png" alt="Camera" />
+                        파일을 여기에 놓거나 클릭하여 업로드합니다.
+                    </span>
+                    <span class="plus">+</span>
+                </div>
+            </form>
+        </div>
+        @Html.DropDownList("Categories")
+        <input name="File_id" value="" id="File_id" type="hidden" />
+        <input name="post_id" type="hidden" asp-for="post_id" />
+        <input name="Category_id" type="hidden" asp-for="Category_id" />
+        <input type="hidden" asp-for="Category_id" name="CategoryValue" id="CategoryValue" required />
+        <div>
+            <label class="control-label">제목</label>
+            <input asp-for="title" type="text" name="title" class="form-control" maxlength="20" required />
+            <span class="text-danger"></span>
+        </div>
+        <div>
+            <label class="control-label">내용</label>
+            <textarea asp-for="contents" name="contents" class="form-control" style="resize: none;" maxlength="200" rows="6" required></textarea>
+            <span class="text-danger"></span>
+        </div>
+        <br />
+        <div>
+            <input id="submit-all" type="submit" value="수정" class="btn btn-success" /> |
+            <a class="btn btn-primary" asp-action="Index">목록으로</a>
+        </div>
     </div>
 </div>
 
@@ -42,5 +108,104 @@
             p.value = e.value
         }
         e.onchange = onChange;
+
+        Dropzone.options.myDropzone = {
+            createImageThumbnails: true,
+            url: '' + document.querySelector('input[name="post_id"]').value,
+            method: 'POST',
+            addRemoveLinks: true,
+            dictRemoveFile: '업로드 취소',
+            autoProcessQueue: false,
+            paramName: "uploadFile",
+            maxFiles: 3,
+            maxFilesize: 100,
+            timeout: 300000,
+            uploadMultiple: true,
+            parallelUploads: 3,
+
+            init: function () {
+                var myDropzone = this;
+
+                var postId = document.querySelector('input[name="post_id"]').value;
+
+                fetch('/Posts/GetFiles/' + postId)
+                    .then(response => response.json())
+                    .then(data => {
+                        const existingFiles = data.map(file => ({
+                            id: file.file_id,
+                            name: file.file_name,
+                            size: file.file_size
+                        }));
+
+                        existingFiles.forEach(function (file) {
+                            var mockFile = { id: file.id, name: file.name, size: file.size };
+                            myDropzone.emit("addedfile", mockFile);
+                            myDropzone.emit("complete", mockFile);
+                        });
+                    });
+
+                document.querySelector("#submit-all").addEventListener("click", function (e) {
+                    e.preventDefault();
+
+                    if (myDropzone.files.length == 0) {
+                        var formData = new FormData();
+                        formData.append('title', document.getElementById('title').value);
+                        formData.append('contents', document.getElementById('contents').value);
+                        formData.append('CategoryValue', document.getElementById('CategoryValue').value);
+                        formData.append('post_id', document.querySelector('input[name="post_id"]').value);
+                        formData.append('Category_id', document.querySelector('input[name="Category_id"]').value);
+                        formData.append('File_id', document.querySelector('input[name="File_id"]').value);
+
+                        fetch('' + document.querySelector('input[name="post_id"]').value, {
+                            method: 'POST',
+                            headers: {
+                                'RequestVerificationToken': document.getElementsByName("__RequestVerificationToken")[1].value
+                            },
+                            body: formData,
+                            contentType: false
+                        })
+                            .then((SUCCESS) => {
+                                window.location.href = '/'
+                            })
+                    } else {
+                        myDropzone.processQueue();
+                    }
+                });
+                this.on('removedfile', function (file) {
+                    var formData = new FormData();
+                    var fileid = file.id;
+                    var fileIds = document.getElementById('File_id').value;
+                    var arrFileIds = fileIds.split(',');
+                    arrFileIds.push(fileid);
+                    document.getElementById('File_id').value = arrFileIds.join(',');
+                });
+                this.on('sending', function (file, xhr, formData) {
+                    formData["__RequestAntiForgeryToken"] = document.getElementsByName("__RequestVerificationToken")[1].value;
+                    console.log('보내는 중')
+                    formData.append('title', document.getElementById('title').value);
+                    formData.append('contents', document.getElementById('contents').value);
+                    formData.append('CategoryValue', document.getElementById('CategoryValue').value);
+                    formData.append('post_id', document.querySelector('input[name="post_id"]').value);
+                    formData.append('Category_id', document.querySelector('input[name="Category_id"]').value);
+                });
+                this.on('success', function (file, responseText) {
+                    console.log('성공');
+                    window.location.href = '/'
+                });
+                this.on('maxfilesexceeded', function (file) {
+                    this.removeFile(file);
+                    alert('최대' + this.options.maxFiles + ' 개의 파일만 업로드할 수 있습니다.');
+                });
+                this.on('error', function (file, errorMessage) {
+                    if (file.size > this.options.maxFilesize * 1024 * 1024) {
+                        this.removeFile(file);
+                        alert('업로드 파일은' + this.options.maxFilesize + ' MB 이하만 가능합니다.');
+                    } else if (errorMessage !== 'You can not upload any more files.') {
+                        this.removeFile(file);
+                        alert(errorMessage);
+                    }
+                });
+            }
+        }
     </script>
 }
