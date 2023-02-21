@@ -15,9 +15,8 @@ ViewCount / SortType / Category / Upload File / Delete check box selection
 
 
 ## List to implement
-Upload File
+
 
 
 ## To be fixed
 
-Upload File
